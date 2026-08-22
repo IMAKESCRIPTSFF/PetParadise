@@ -11,8 +11,8 @@ gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 220, 0, 150)
-main.Position = UDim2.new(0.5, -110, 0.5, -75)
+main.Size = UDim2.new(0, 220, 0, 260)
+main.Position = UDim2.new(0.5, -110, 0.5, -130)
 main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 main.BorderSizePixel = 0
 main.Parent = gui
@@ -91,10 +91,41 @@ local chestCorner = Instance.new("UICorner")
 chestCorner.CornerRadius = UDim.new(0, 6)
 chestCorner.Parent = chestButton
 
+-- Auto Buy Merchant button
+local merchantButton = Instance.new("TextButton")
+merchantButton.Size = UDim2.new(0, 180, 0, 45)
+merchantButton.Position = UDim2.new(0.5, -90, 0, 150)
+merchantButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+merchantButton.Text = "Auto Buy Merchant: OFF"
+merchantButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+merchantButton.TextSize = 13
+merchantButton.Font = Enum.Font.GothamBold
+merchantButton.Parent = main
+
+local merchantCorner = Instance.new("UICorner")
+merchantCorner.CornerRadius = UDim.new(0, 6)
+merchantCorner.Parent = merchantButton
+
 -- States
 local eggEnabled = false
 local chestEnabled = false
+local merchantEnabled = false
 local minimized = false
+
+-- Merchant items
+local merchantItems = {
+    "Coin1",
+    "Luck1",
+    "Speed1",
+    "Coin2",
+    "Luck2",
+    "Speed2",
+    "Coin3",
+    "Luck3",
+    "Speed3",
+    "Mega1",
+    "hugeEgg3"
+}
 
 -- Nightmare Egg loop
 task.spawn(function()
@@ -115,7 +146,6 @@ task.spawn(function()
 end)
 
 -- Coin Chest loop
--- Claims immediately, then every 30 seconds
 task.spawn(function()
     while gui.Parent do
         if chestEnabled then
@@ -126,6 +156,28 @@ task.spawn(function()
             end)
 
             task.wait(30)
+        else
+            task.wait(0.1)
+        end
+    end
+end)
+
+-- Auto Buy Merchant loop
+task.spawn(function()
+    while gui.Parent do
+        if merchantEnabled then
+
+            for _, itemName in ipairs(merchantItems) do
+                if not merchantEnabled or not gui.Parent then
+                    break
+                end
+
+                pcall(function()
+                    ReplicatedStorage.MerchantPurchase:FireServer(itemName)
+                end)
+            end
+
+            task.wait(10)
         else
             task.wait(0.1)
         end
@@ -158,6 +210,19 @@ chestButton.MouseButton1Click:Connect(function()
     end
 end)
 
+-- Auto Buy Merchant toggle
+merchantButton.MouseButton1Click:Connect(function()
+    merchantEnabled = not merchantEnabled
+
+    if merchantEnabled then
+        merchantButton.Text = "Auto Buy Merchant: ON"
+        merchantButton.BackgroundColor3 = Color3.fromRGB(50, 170, 80)
+    else
+        merchantButton.Text = "Auto Buy Merchant: OFF"
+        merchantButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+    end
+end)
+
 -- Minimize
 minimize.MouseButton1Click:Connect(function()
     minimized = not minimized
@@ -167,13 +232,15 @@ minimize.MouseButton1Click:Connect(function()
 
         eggButton.Visible = false
         chestButton.Visible = false
+        merchantButton.Visible = false
 
         minimize.Text = "+"
     else
-        main.Size = UDim2.new(0, 220, 0, 150)
+        main.Size = UDim2.new(0, 220, 0, 260)
 
         eggButton.Visible = true
         chestButton.Visible = true
+        merchantButton.Visible = true
 
         minimize.Text = "−"
     end
@@ -183,6 +250,8 @@ end)
 close.MouseButton1Click:Connect(function()
     eggEnabled = false
     chestEnabled = false
+    merchantEnabled = false
+
     gui:Destroy()
 end)
 
