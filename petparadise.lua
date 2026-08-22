@@ -11,8 +11,8 @@ gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 220, 0, 205)
-main.Position = UDim2.new(0.5, -110, 0.5, -102)
+main.Size = UDim2.new(0, 220, 0, 150)
+main.Position = UDim2.new(0.5, -110, 0.5, -75)
 main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 main.BorderSizePixel = 0
 main.Parent = gui
@@ -91,25 +91,9 @@ local chestCorner = Instance.new("UICorner")
 chestCorner.CornerRadius = UDim.new(0, 6)
 chestCorner.Parent = chestButton
 
--- AutoFish button
-local autoFishButton = Instance.new("TextButton")
-autoFishButton.Size = UDim2.new(0, 180, 0, 45)
-autoFishButton.Position = UDim2.new(0.5, -90, 0, 150)
-autoFishButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
-autoFishButton.Text = "AutoFish: OFF"
-autoFishButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-autoFishButton.TextSize = 15
-autoFishButton.Font = Enum.Font.GothamBold
-autoFishButton.Parent = main
-
-local autoFishCorner = Instance.new("UICorner")
-autoFishCorner.CornerRadius = UDim.new(0, 6)
-autoFishCorner.Parent = autoFishButton
-
 -- States
 local eggEnabled = false
 local chestEnabled = false
-local autoFishEnabled = false
 local minimized = false
 
 -- Nightmare Egg loop
@@ -148,29 +132,6 @@ task.spawn(function()
     end
 end)
 
--- AutoFish loop
-task.spawn(function()
-    local fishState = false
-
-    while gui.Parent do
-        if autoFishEnabled then
-            fishState = not fishState
-
-            pcall(function()
-                local args = {
-                    [1] = fishState
-                }
-
-                ReplicatedStorage.Events.SetAutoFish:FireServer(unpack(args))
-            end)
-
-            task.wait(0.5)
-        else
-            task.wait(0.1)
-        end
-    end
-end)
-
 -- Egg toggle
 eggButton.MouseButton1Click:Connect(function()
     eggEnabled = not eggEnabled
@@ -197,19 +158,6 @@ chestButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- AutoFish toggle
-autoFishButton.MouseButton1Click:Connect(function()
-    autoFishEnabled = not autoFishEnabled
-
-    if autoFishEnabled then
-        autoFishButton.Text = "AutoFish: ON"
-        autoFishButton.BackgroundColor3 = Color3.fromRGB(50, 170, 80)
-    else
-        autoFishButton.Text = "AutoFish: OFF"
-        autoFishButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
-    end
-end)
-
 -- Minimize
 minimize.MouseButton1Click:Connect(function()
     minimized = not minimized
@@ -219,15 +167,13 @@ minimize.MouseButton1Click:Connect(function()
 
         eggButton.Visible = false
         chestButton.Visible = false
-        autoFishButton.Visible = false
 
         minimize.Text = "+"
     else
-        main.Size = UDim2.new(0, 220, 0, 205)
+        main.Size = UDim2.new(0, 220, 0, 150)
 
         eggButton.Visible = true
         chestButton.Visible = true
-        autoFishButton.Visible = true
 
         minimize.Text = "−"
     end
@@ -237,8 +183,6 @@ end)
 close.MouseButton1Click:Connect(function()
     eggEnabled = false
     chestEnabled = false
-    autoFishEnabled = false
-
     gui:Destroy()
 end)
 
