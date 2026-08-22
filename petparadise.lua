@@ -12,10 +12,13 @@ local CHEST_DELAY = 30
 --// Colors
 local BG = Color3.fromRGB(20, 20, 24)
 local TOP = Color3.fromRGB(27, 27, 33)
-local BUTTON = Color3.fromRGB(31, 31, 38)
-local BUTTON_HOVER = Color3.fromRGB(42, 42, 51)
-local ON_COLOR = Color3.fromRGB(45, 190, 85)
-local ON_HOVER = Color3.fromRGB(55, 215, 100)
+
+local BUTTON_OFF = Color3.fromRGB(31, 31, 38)
+local BUTTON_OFF_HOVER = Color3.fromRGB(42, 42, 51)
+
+local BUTTON_ON = Color3.fromRGB(45, 190, 85)
+local BUTTON_ON_HOVER = Color3.fromRGB(55, 215, 100)
+
 local STROKE = Color3.fromRGB(60, 60, 72)
 local TEXT = Color3.fromRGB(240, 240, 245)
 local MUTED = Color3.fromRGB(155, 155, 170)
@@ -28,7 +31,7 @@ gui.ResetOnSpawn = false
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = player:WaitForChild("PlayerGui")
 
---// Main
+--// Main window
 local main = Instance.new("Frame")
 main.Size = UDim2.new(0, 260, 0, 185)
 main.Position = UDim2.new(0.5, -130, 0.5, -92)
@@ -89,7 +92,7 @@ title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = topBar
 
---// Minimize
+--// Minimize button
 local minimize = Instance.new("TextButton")
 minimize.Size = UDim2.new(0, 28, 0, 28)
 minimize.Position = UDim2.new(1, -66, 0.5, -14)
@@ -101,7 +104,7 @@ minimize.Font = Enum.Font.GothamBold
 minimize.AutoButtonColor = false
 minimize.Parent = topBar
 
---// Close
+--// Close button
 local close = Instance.new("TextButton")
 close.Size = UDim2.new(0, 28, 0, 28)
 close.Position = UDim2.new(1, -35, 0.5, -14)
@@ -113,7 +116,7 @@ close.Font = Enum.Font.GothamBold
 close.AutoButtonColor = false
 close.Parent = topBar
 
---// Top button hover
+--// Minimize hover
 minimize.MouseEnter:Connect(function()
     TweenService:Create(
         minimize,
@@ -130,6 +133,7 @@ minimize.MouseLeave:Connect(function()
     ):Play()
 end)
 
+--// Close hover
 close.MouseEnter:Connect(function()
     TweenService:Create(
         close,
@@ -153,13 +157,13 @@ content.Position = UDim2.new(0, 12, 0, 50)
 content.BackgroundTransparency = 1
 content.Parent = main
 
---// Create button
+--// Button creator
 local function createButton(text, y)
     local button = Instance.new("TextButton")
 
     button.Size = UDim2.new(1, 0, 0, 52)
     button.Position = UDim2.new(0, 0, 0, y)
-    button.BackgroundColor3 = BUTTON
+    button.BackgroundColor3 = BUTTON_OFF
     button.BorderSizePixel = 0
     button.Text = text
     button.TextColor3 = TEXT
@@ -184,14 +188,14 @@ end
 local eggButton = createButton("🥚  Egg: OFF", 0)
 local chestButton = createButton("🪙  Chest: OFF", 62)
 
---// State
+--// States
 local eggEnabled = false
 local chestEnabled = false
 local minimized = false
 local lastCloseClick = 0
 local closing = false
 
---// Button animation helper
+--// Set button state
 local function setButtonState(button, enabled, label)
     if enabled then
         button.Text = label .. ": ON"
@@ -200,7 +204,7 @@ local function setButtonState(button, enabled, label)
             button,
             TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
             {
-                BackgroundColor3 = ON_COLOR,
+                BackgroundColor3 = BUTTON_ON,
                 TextColor3 = Color3.fromRGB(255, 255, 255)
             }
         ):Play()
@@ -211,7 +215,7 @@ local function setButtonState(button, enabled, label)
             button,
             TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
             {
-                BackgroundColor3 = BUTTON,
+                BackgroundColor3 = BUTTON_OFF,
                 TextColor3 = TEXT
             }
         ):Play()
@@ -220,7 +224,7 @@ end
 
 --// Egg hover
 eggButton.MouseEnter:Connect(function()
-    local color = eggEnabled and ON_HOVER or BUTTON_HOVER
+    local color = eggEnabled and BUTTON_ON_HOVER or BUTTON_OFF_HOVER
 
     TweenService:Create(
         eggButton,
@@ -230,7 +234,7 @@ eggButton.MouseEnter:Connect(function()
 end)
 
 eggButton.MouseLeave:Connect(function()
-    local color = eggEnabled and ON_COLOR or BUTTON
+    local color = eggEnabled and BUTTON_ON or BUTTON_OFF
 
     TweenService:Create(
         eggButton,
@@ -241,7 +245,7 @@ end)
 
 --// Chest hover
 chestButton.MouseEnter:Connect(function()
-    local color = chestEnabled and ON_HOVER or BUTTON_HOVER
+    local color = chestEnabled and BUTTON_ON_HOVER or BUTTON_OFF_HOVER
 
     TweenService:Create(
         chestButton,
@@ -251,7 +255,7 @@ chestButton.MouseEnter:Connect(function()
 end)
 
 chestButton.MouseLeave:Connect(function()
-    local color = chestEnabled and ON_COLOR or BUTTON
+    local color = chestEnabled and BUTTON_ON or BUTTON_OFF
 
     TweenService:Create(
         chestButton,
@@ -278,7 +282,7 @@ task.spawn(function()
     end
 end)
 
---// Chest loop
+--// Coin Chest loop
 task.spawn(function()
     while gui.Parent do
         if chestEnabled then
@@ -298,13 +302,23 @@ end)
 --// Egg toggle
 eggButton.MouseButton1Click:Connect(function()
     eggEnabled = not eggEnabled
-    setButtonState(eggButton, eggEnabled, "🥚  Egg")
+
+    setButtonState(
+        eggButton,
+        eggEnabled,
+        "🥚  Egg"
+    )
 end)
 
 --// Chest toggle
 chestButton.MouseButton1Click:Connect(function()
     chestEnabled = not chestEnabled
-    setButtonState(chestButton, chestEnabled, "🪙  Chest")
+
+    setButtonState(
+        chestButton,
+        chestEnabled,
+        "🪙  Chest"
+    )
 end)
 
 --// Minimize
@@ -316,8 +330,14 @@ minimize.MouseButton1Click:Connect(function()
 
         TweenService:Create(
             main,
-            TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
-            {Size = UDim2.new(0, 260, 0, 42)}
+            TweenInfo.new(
+                0.25,
+                Enum.EasingStyle.Quart,
+                Enum.EasingDirection.Out
+            ),
+            {
+                Size = UDim2.new(0, 260, 0, 42)
+            }
         ):Play()
 
         minimize.Text = "+"
@@ -327,15 +347,21 @@ minimize.MouseButton1Click:Connect(function()
 
         TweenService:Create(
             main,
-            TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
-            {Size = UDim2.new(0, 260, 0, 185)}
+            TweenInfo.new(
+                0.25,
+                Enum.EasingStyle.Quart,
+                Enum.EasingDirection.Out
+            ),
+            {
+                Size = UDim2.new(0, 260, 0, 185)
+            }
         ):Play()
 
         minimize.Text = "−"
     end
 end)
 
---// Double-click close confirmation
+--// Double-click X confirmation
 close.MouseButton1Click:Connect(function()
     local currentTime = tick()
 
@@ -344,7 +370,11 @@ close.MouseButton1Click:Connect(function()
 
         TweenService:Create(
             main,
-            TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.In),
+            TweenInfo.new(
+                0.25,
+                Enum.EasingStyle.Back,
+                Enum.EasingDirection.In
+            ),
             {
                 Size = UDim2.new(0, 0, 0, 0),
                 Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -355,6 +385,7 @@ close.MouseButton1Click:Connect(function()
 
         eggEnabled = false
         chestEnabled = false
+
         gui:Destroy()
     else
         lastCloseClick = currentTime
@@ -411,6 +442,7 @@ end)
 
 UserInputService.InputChanged:Connect(function(input)
     if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+
         local delta = input.Position - dragStart
 
         main.Position = UDim2.new(
@@ -434,7 +466,11 @@ main.Position = UDim2.new(0.5, 0, 0.5, 0)
 
 TweenService:Create(
     main,
-    TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+    TweenInfo.new(
+        0.45,
+        Enum.EasingStyle.Back,
+        Enum.EasingDirection.Out
+    ),
     {
         Size = UDim2.new(0, 260, 0, 185),
         Position = UDim2.new(0.5, -130, 0.5, -92)
