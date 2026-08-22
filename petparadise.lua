@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
 
@@ -10,8 +11,8 @@ gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 220, 0, 100)
-main.Position = UDim2.new(0.5, -110, 0.5, -50)
+main.Size = UDim2.new(0, 220, 0, 150)
+main.Position = UDim2.new(0.5, -110, 0.5, -75)
 main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 main.BorderSizePixel = 0
 main.Parent = gui
@@ -38,7 +39,7 @@ title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = titleBar
 
--- Minimize
+-- Minimize button
 local minimize = Instance.new("TextButton")
 minimize.Size = UDim2.new(0, 25, 0, 25)
 minimize.Position = UDim2.new(1, -55, 0, 2)
@@ -49,7 +50,7 @@ minimize.TextSize = 20
 minimize.Font = Enum.Font.GothamBold
 minimize.Parent = titleBar
 
--- Close
+-- Close button
 local close = Instance.new("TextButton")
 close.Size = UDim2.new(0, 25, 0, 25)
 close.Position = UDim2.new(1, -28, 0, 2)
@@ -60,29 +61,45 @@ close.TextSize = 20
 close.Font = Enum.Font.GothamBold
 close.Parent = titleBar
 
--- ON/OFF button
-local toggle = Instance.new("TextButton")
-toggle.Size = UDim2.new(0, 180, 0, 45)
-toggle.Position = UDim2.new(0.5, -90, 0, 45)
-toggle.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
-toggle.Text = "OFF"
-toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggle.TextSize = 16
-toggle.Font = Enum.Font.GothamBold
-toggle.Parent = main
+-- Egg button
+local eggButton = Instance.new("TextButton")
+eggButton.Size = UDim2.new(0, 180, 0, 45)
+eggButton.Position = UDim2.new(0.5, -90, 0, 40)
+eggButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+eggButton.Text = "Egg: OFF"
+eggButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+eggButton.TextSize = 15
+eggButton.Font = Enum.Font.GothamBold
+eggButton.Parent = main
 
-local toggleCorner = Instance.new("UICorner")
-toggleCorner.CornerRadius = UDim.new(0, 6)
-toggleCorner.Parent = toggle
+local eggCorner = Instance.new("UICorner")
+eggCorner.CornerRadius = UDim.new(0, 6)
+eggCorner.Parent = eggButton
 
--- State
-local enabled = false
+-- Chest button
+local chestButton = Instance.new("TextButton")
+chestButton.Size = UDim2.new(0, 180, 0, 45)
+chestButton.Position = UDim2.new(0.5, -90, 0, 95)
+chestButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+chestButton.Text = "Chest: OFF"
+chestButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+chestButton.TextSize = 15
+chestButton.Font = Enum.Font.GothamBold
+chestButton.Parent = main
+
+local chestCorner = Instance.new("UICorner")
+chestCorner.CornerRadius = UDim.new(0, 6)
+chestCorner.Parent = chestButton
+
+-- States
+local eggEnabled = false
+local chestEnabled = false
 local minimized = false
 
--- Hatch loop
+-- Nightmare Egg loop
 task.spawn(function()
     while gui.Parent do
-        if enabled then
+        if eggEnabled then
             pcall(function()
                 ReplicatedStorage.Functions.Hatch:InvokeServer(
                     "Nightmare Egg",
@@ -97,16 +114,47 @@ task.spawn(function()
     end
 end)
 
--- Toggle
-toggle.MouseButton1Click:Connect(function()
-    enabled = not enabled
+-- Coin Chest loop
+-- Claims immediately, then every 30 seconds
+task.spawn(function()
+    while gui.Parent do
+        if chestEnabled then
+            pcall(function()
+                ReplicatedStorage.Functions.CollectChest:InvokeServer(
+                    "CoinChest"
+                )
+            end)
 
-    if enabled then
-        toggle.Text = "ON"
-        toggle.BackgroundColor3 = Color3.fromRGB(50, 170, 80)
+            task.wait(30)
+        else
+            task.wait(0.1)
+        end
+    end
+end)
+
+-- Egg toggle
+eggButton.MouseButton1Click:Connect(function()
+    eggEnabled = not eggEnabled
+
+    if eggEnabled then
+        eggButton.Text = "Egg: ON"
+        eggButton.BackgroundColor3 = Color3.fromRGB(50, 170, 80)
     else
-        toggle.Text = "OFF"
-        toggle.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+        eggButton.Text = "Egg: OFF"
+        eggButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+    end
+end)
+
+-- Chest toggle
+chestButton.MouseButton1Click:Connect(function()
+    chestEnabled = not chestEnabled
+
+    if chestEnabled then
+        chestButton.Text = "Chest: ON"
+        chestButton.BackgroundColor3 = Color3.fromRGB(50, 170, 80)
+    else
+        chestButton.Text = "Chest: OFF"
+        chestButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
     end
 end)
 
@@ -116,24 +164,29 @@ minimize.MouseButton1Click:Connect(function()
 
     if minimized then
         main.Size = UDim2.new(0, 220, 0, 30)
-        toggle.Visible = false
+
+        eggButton.Visible = false
+        chestButton.Visible = false
+
         minimize.Text = "+"
     else
-        main.Size = UDim2.new(0, 220, 0, 100)
-        toggle.Visible = true
+        main.Size = UDim2.new(0, 220, 0, 150)
+
+        eggButton.Visible = true
+        chestButton.Visible = true
+
         minimize.Text = "−"
     end
 end)
 
 -- Close
 close.MouseButton1Click:Connect(function()
-    enabled = false
+    eggEnabled = false
+    chestEnabled = false
     gui:Destroy()
 end)
 
 -- Dragging
-local UserInputService = game:GetService("UserInputService")
-
 local dragging = false
 local dragStart
 local startPos
