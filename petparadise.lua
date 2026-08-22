@@ -31,7 +31,7 @@ gui.ResetOnSpawn = false
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = player:WaitForChild("PlayerGui")
 
---// Main window
+--// Main
 local main = Instance.new("Frame")
 main.Size = UDim2.new(0, 260, 0, 185)
 main.Position = UDim2.new(0.5, -130, 0.5, -92)
@@ -55,6 +55,7 @@ local topBar = Instance.new("Frame")
 topBar.Size = UDim2.new(1, 0, 0, 42)
 topBar.BackgroundColor3 = TOP
 topBar.BorderSizePixel = 0
+topBar.Active = true
 topBar.Parent = main
 
 local topCorner = Instance.new("UICorner")
@@ -67,6 +68,17 @@ topFill.Position = UDim2.new(0, 0, 1, -12)
 topFill.BackgroundColor3 = TOP
 topFill.BorderSizePixel = 0
 topFill.Parent = topBar
+
+--// Dedicated drag area
+local dragArea = Instance.new("TextButton")
+dragArea.Size = UDim2.new(1, -75, 1, 0)
+dragArea.Position = UDim2.new(0, 0, 0, 0)
+dragArea.BackgroundTransparency = 1
+dragArea.Text = ""
+dragArea.AutoButtonColor = false
+dragArea.Active = true
+dragArea.ZIndex = 10
+dragArea.Parent = topBar
 
 --// Purple accent
 local accent = Instance.new("Frame")
@@ -90,9 +102,10 @@ title.TextColor3 = TEXT
 title.TextSize = 15
 title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
+title.ZIndex = 2
 title.Parent = topBar
 
---// Minimize button
+--// Minimize
 local minimize = Instance.new("TextButton")
 minimize.Size = UDim2.new(0, 28, 0, 28)
 minimize.Position = UDim2.new(1, -66, 0.5, -14)
@@ -102,9 +115,10 @@ minimize.TextColor3 = MUTED
 minimize.TextSize = 19
 minimize.Font = Enum.Font.GothamBold
 minimize.AutoButtonColor = false
+minimize.ZIndex = 20
 minimize.Parent = topBar
 
---// Close button
+--// Close
 local close = Instance.new("TextButton")
 close.Size = UDim2.new(0, 28, 0, 28)
 close.Position = UDim2.new(1, -35, 0.5, -14)
@@ -114,50 +128,17 @@ close.TextColor3 = MUTED
 close.TextSize = 21
 close.Font = Enum.Font.GothamBold
 close.AutoButtonColor = false
+close.ZIndex = 20
 close.Parent = topBar
 
---// Minimize hover
-minimize.MouseEnter:Connect(function()
-    TweenService:Create(
-        minimize,
-        TweenInfo.new(0.15),
-        {TextColor3 = TEXT}
-    ):Play()
-end)
-
-minimize.MouseLeave:Connect(function()
-    TweenService:Create(
-        minimize,
-        TweenInfo.new(0.15),
-        {TextColor3 = MUTED}
-    ):Play()
-end)
-
---// Close hover
-close.MouseEnter:Connect(function()
-    TweenService:Create(
-        close,
-        TweenInfo.new(0.15),
-        {TextColor3 = RED}
-    ):Play()
-end)
-
-close.MouseLeave:Connect(function()
-    TweenService:Create(
-        close,
-        TweenInfo.new(0.15),
-        {TextColor3 = MUTED}
-    ):Play()
-end)
-
---// Content
+--// Button content
 local content = Instance.new("Frame")
 content.Size = UDim2.new(1, -24, 1, -55)
 content.Position = UDim2.new(0, 12, 0, 50)
 content.BackgroundTransparency = 1
 content.Parent = main
 
---// Button creator
+--// Create toggle
 local function createButton(text, y)
     local button = Instance.new("TextButton")
 
@@ -188,21 +169,21 @@ end
 local eggButton = createButton("🥚  Egg: OFF", 0)
 local chestButton = createButton("🪙  Chest: OFF", 62)
 
---// States
+--// State
 local eggEnabled = false
 local chestEnabled = false
 local minimized = false
 local lastCloseClick = 0
 local closing = false
 
---// Set button state
+--// Button state
 local function setButtonState(button, enabled, label)
     if enabled then
         button.Text = label .. ": ON"
 
         TweenService:Create(
             button,
-            TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+            TweenInfo.new(0.2),
             {
                 BackgroundColor3 = BUTTON_ON,
                 TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -213,7 +194,7 @@ local function setButtonState(button, enabled, label)
 
         TweenService:Create(
             button,
-            TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+            TweenInfo.new(0.2),
             {
                 BackgroundColor3 = BUTTON_OFF,
                 TextColor3 = TEXT
@@ -222,45 +203,52 @@ local function setButtonState(button, enabled, label)
     end
 end
 
---// Egg hover
+--// Hover
 eggButton.MouseEnter:Connect(function()
-    local color = eggEnabled and BUTTON_ON_HOVER or BUTTON_OFF_HOVER
-
     TweenService:Create(
         eggButton,
         TweenInfo.new(0.15),
-        {BackgroundColor3 = color}
+        {
+            BackgroundColor3 = eggEnabled
+                and BUTTON_ON_HOVER
+                or BUTTON_OFF_HOVER
+        }
     ):Play()
 end)
 
 eggButton.MouseLeave:Connect(function()
-    local color = eggEnabled and BUTTON_ON or BUTTON_OFF
-
     TweenService:Create(
         eggButton,
         TweenInfo.new(0.15),
-        {BackgroundColor3 = color}
+        {
+            BackgroundColor3 = eggEnabled
+                and BUTTON_ON
+                or BUTTON_OFF
+        }
     ):Play()
 end)
 
---// Chest hover
 chestButton.MouseEnter:Connect(function()
-    local color = chestEnabled and BUTTON_ON_HOVER or BUTTON_OFF_HOVER
-
     TweenService:Create(
         chestButton,
         TweenInfo.new(0.15),
-        {BackgroundColor3 = color}
+        {
+            BackgroundColor3 = chestEnabled
+                and BUTTON_ON_HOVER
+                or BUTTON_OFF_HOVER
+        }
     ):Play()
 end)
 
 chestButton.MouseLeave:Connect(function()
-    local color = chestEnabled and BUTTON_ON or BUTTON_OFF
-
     TweenService:Create(
         chestButton,
         TweenInfo.new(0.15),
-        {BackgroundColor3 = color}
+        {
+            BackgroundColor3 = chestEnabled
+                and BUTTON_ON
+                or BUTTON_OFF
+        }
     ):Play()
 end)
 
@@ -282,7 +270,7 @@ task.spawn(function()
     end
 end)
 
---// Coin Chest loop
+--// Chest loop
 task.spawn(function()
     while gui.Parent do
         if chestEnabled then
@@ -302,23 +290,13 @@ end)
 --// Egg toggle
 eggButton.MouseButton1Click:Connect(function()
     eggEnabled = not eggEnabled
-
-    setButtonState(
-        eggButton,
-        eggEnabled,
-        "🥚  Egg"
-    )
+    setButtonState(eggButton, eggEnabled, "🥚  Egg")
 end)
 
 --// Chest toggle
 chestButton.MouseButton1Click:Connect(function()
     chestEnabled = not chestEnabled
-
-    setButtonState(
-        chestButton,
-        chestEnabled,
-        "🪙  Chest"
-    )
+    setButtonState(chestButton, chestEnabled, "🪙  Chest")
 end)
 
 --// Minimize
@@ -327,54 +305,39 @@ minimize.MouseButton1Click:Connect(function()
 
     if minimized then
         content.Visible = false
+        minimize.Text = "+"
 
         TweenService:Create(
             main,
-            TweenInfo.new(
-                0.25,
-                Enum.EasingStyle.Quart,
-                Enum.EasingDirection.Out
-            ),
+            TweenInfo.new(0.25, Enum.EasingStyle.Quart),
             {
                 Size = UDim2.new(0, 260, 0, 42)
             }
         ):Play()
-
-        minimize.Text = "+"
-
     else
         content.Visible = true
+        minimize.Text = "−"
 
         TweenService:Create(
             main,
-            TweenInfo.new(
-                0.25,
-                Enum.EasingStyle.Quart,
-                Enum.EasingDirection.Out
-            ),
+            TweenInfo.new(0.25, Enum.EasingStyle.Quart),
             {
                 Size = UDim2.new(0, 260, 0, 185)
             }
         ):Play()
-
-        minimize.Text = "−"
     end
 end)
 
---// Double-click X confirmation
+--// Double-click close
 close.MouseButton1Click:Connect(function()
-    local currentTime = tick()
+    local now = tick()
 
-    if currentTime - lastCloseClick <= 0.6 then
+    if now - lastCloseClick <= 0.6 then
         closing = true
 
         TweenService:Create(
             main,
-            TweenInfo.new(
-                0.25,
-                Enum.EasingStyle.Back,
-                Enum.EasingDirection.In
-            ),
+            TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.In),
             {
                 Size = UDim2.new(0, 0, 0, 0),
                 Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -385,10 +348,9 @@ close.MouseButton1Click:Connect(function()
 
         eggEnabled = false
         chestEnabled = false
-
         gui:Destroy()
     else
-        lastCloseClick = currentTime
+        lastCloseClick = now
 
         close.Text = "?"
         close.TextColor3 = Color3.fromRGB(255, 200, 80)
@@ -402,47 +364,20 @@ close.MouseButton1Click:Connect(function()
     end
 end)
 
---// Dragging
+--// DRAGGING
+-- Dedicated drag button makes this reliable.
 local dragging = false
-local dragStart
-local startPosition
+local dragStart = nil
+local startPosition = nil
 
-topBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-
-        local mousePosition = input.Position
-
-        local minPos = minimize.AbsolutePosition
-        local minSize = minimize.AbsoluteSize
-
-        local closePos = close.AbsolutePosition
-        local closeSize = close.AbsoluteSize
-
-        local onMinimize =
-            mousePosition.X >= minPos.X and
-            mousePosition.X <= minPos.X + minSize.X and
-            mousePosition.Y >= minPos.Y and
-            mousePosition.Y <= minPos.Y + minSize.Y
-
-        local onClose =
-            mousePosition.X >= closePos.X and
-            mousePosition.X <= closePos.X + closeSize.X and
-            mousePosition.Y >= closePos.Y and
-            mousePosition.Y <= closePos.Y + closeSize.Y
-
-        if onMinimize or onClose then
-            return
-        end
-
-        dragging = true
-        dragStart = input.Position
-        startPosition = main.Position
-    end
+dragArea.MouseButton1Down:Connect(function(x, y)
+    dragging = true
+    dragStart = Vector2.new(x, y)
+    startPosition = main.Position
 end)
 
 UserInputService.InputChanged:Connect(function(input)
     if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-
         local delta = input.Position - dragStart
 
         main.Position = UDim2.new(
