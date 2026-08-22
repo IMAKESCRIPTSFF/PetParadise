@@ -11,8 +11,8 @@ gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 220, 0, 260)
-main.Position = UDim2.new(0.5, -110, 0.5, -130)
+main.Size = UDim2.new(0, 220, 0, 315)
+main.Position = UDim2.new(0.5, -110, 0.5, -157)
 main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 main.BorderSizePixel = 0
 main.Parent = gui
@@ -106,10 +106,26 @@ local merchantCorner = Instance.new("UICorner")
 merchantCorner.CornerRadius = UDim.new(0, 6)
 merchantCorner.Parent = merchantButton
 
+-- Auto Rebirth button
+local rebirthButton = Instance.new("TextButton")
+rebirthButton.Size = UDim2.new(0, 180, 0, 45)
+rebirthButton.Position = UDim2.new(0.5, -90, 0, 205)
+rebirthButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+rebirthButton.Text = "Auto Rebirth: OFF"
+rebirthButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+rebirthButton.TextSize = 14
+rebirthButton.Font = Enum.Font.GothamBold
+rebirthButton.Parent = main
+
+local rebirthCorner = Instance.new("UICorner")
+rebirthCorner.CornerRadius = UDim.new(0, 6)
+rebirthCorner.Parent = rebirthButton
+
 -- States
 local eggEnabled = false
 local chestEnabled = false
 local merchantEnabled = false
+local rebirthEnabled = false
 local minimized = false
 
 -- Merchant items
@@ -166,7 +182,6 @@ end)
 task.spawn(function()
     while gui.Parent do
         if merchantEnabled then
-
             for _, itemName in ipairs(merchantItems) do
                 if not merchantEnabled or not gui.Parent then
                     break
@@ -178,6 +193,21 @@ task.spawn(function()
             end
 
             task.wait(10)
+        else
+            task.wait(0.1)
+        end
+    end
+end)
+
+-- Auto Rebirth loop
+task.spawn(function()
+    while gui.Parent do
+        if rebirthEnabled then
+            pcall(function()
+                ReplicatedStorage.Events.Rebirth:FireServer(1)
+            end)
+
+            task.wait(0.1)
         else
             task.wait(0.1)
         end
@@ -223,6 +253,19 @@ merchantButton.MouseButton1Click:Connect(function()
     end
 end)
 
+-- Auto Rebirth toggle
+rebirthButton.MouseButton1Click:Connect(function()
+    rebirthEnabled = not rebirthEnabled
+
+    if rebirthEnabled then
+        rebirthButton.Text = "Auto Rebirth: ON"
+        rebirthButton.BackgroundColor3 = Color3.fromRGB(50, 170, 80)
+    else
+        rebirthButton.Text = "Auto Rebirth: OFF"
+        rebirthButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+    end
+end)
+
 -- Minimize
 minimize.MouseButton1Click:Connect(function()
     minimized = not minimized
@@ -233,14 +276,16 @@ minimize.MouseButton1Click:Connect(function()
         eggButton.Visible = false
         chestButton.Visible = false
         merchantButton.Visible = false
+        rebirthButton.Visible = false
 
         minimize.Text = "+"
     else
-        main.Size = UDim2.new(0, 220, 0, 260)
+        main.Size = UDim2.new(0, 220, 0, 315)
 
         eggButton.Visible = true
         chestButton.Visible = true
         merchantButton.Visible = true
+        rebirthButton.Visible = true
 
         minimize.Text = "−"
     end
@@ -251,6 +296,7 @@ close.MouseButton1Click:Connect(function()
     eggEnabled = false
     chestEnabled = false
     merchantEnabled = false
+    rebirthEnabled = false
 
     gui:Destroy()
 end)
