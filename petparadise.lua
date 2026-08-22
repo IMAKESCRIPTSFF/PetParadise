@@ -5,28 +5,40 @@ local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 
---// Settings
+--==================================================
+-- SETTINGS
+--==================================================
+
 local EGG_DELAY = 0.1
 local CHEST_DELAY = 30
 
---// Colors
-local BG = Color3.fromRGB(20, 20, 24)
-local TOP = Color3.fromRGB(27, 27, 33)
+--==================================================
+-- COLORS
+--==================================================
 
-local BUTTON_OFF = Color3.fromRGB(31, 31, 38)
-local BUTTON_OFF_HOVER = Color3.fromRGB(42, 42, 51)
+local COLORS = {
+    Background = Color3.fromRGB(20, 20, 25),
+    Header = Color3.fromRGB(27, 27, 33),
 
-local BUTTON_ON = Color3.fromRGB(45, 190, 85)
-local BUTTON_ON_HOVER = Color3.fromRGB(55, 215, 100)
+    ButtonOff = Color3.fromRGB(31, 31, 38),
+    ButtonOffHover = Color3.fromRGB(40, 40, 48),
 
-local STROKE = Color3.fromRGB(60, 60, 72)
-local TEXT = Color3.fromRGB(240, 240, 245)
-local MUTED = Color3.fromRGB(155, 155, 170)
-local RED = Color3.fromRGB(220, 75, 85)
+    ButtonOn = Color3.fromRGB(45, 190, 85),
+    ButtonOnHover = Color3.fromRGB(55, 210, 95),
 
-----------------------------------------------------------------
+    Text = Color3.fromRGB(240, 240, 245),
+    Muted = Color3.fromRGB(155, 155, 165),
+
+    Border = Color3.fromRGB(65, 65, 75),
+
+    Purple = Color3.fromRGB(145, 85, 255),
+
+    Red = Color3.fromRGB(225, 70, 80)
+}
+
+--==================================================
 -- GUI
-----------------------------------------------------------------
+--==================================================
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "NightmareEggGUI"
@@ -34,240 +46,252 @@ gui.ResetOnSpawn = false
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = player:WaitForChild("PlayerGui")
 
-----------------------------------------------------------------
--- MAIN WINDOW
-----------------------------------------------------------------
+--==================================================
+-- MAIN
+--==================================================
 
 local main = Instance.new("Frame")
 main.Name = "Main"
-main.Size = UDim2.new(0, 260, 0, 185)
-main.Position = UDim2.new(0.5, -130, 0.5, -92)
-main.BackgroundColor3 = BG
+main.Size = UDim2.fromOffset(270, 190)
+main.Position = UDim2.new(0.5, -135, 0.5, -95)
+main.BackgroundColor3 = COLORS.Background
 main.BorderSizePixel = 0
 main.ClipsDescendants = true
 main.Parent = gui
 
 local mainCorner = Instance.new("UICorner")
-mainCorner.CornerRadius = UDim.new(0, 12)
+mainCorner.CornerRadius = UDim.new(0, 13)
 mainCorner.Parent = main
 
 local mainStroke = Instance.new("UIStroke")
-mainStroke.Color = STROKE
+mainStroke.Color = COLORS.Border
 mainStroke.Thickness = 1
-mainStroke.Transparency = 0.25
+mainStroke.Transparency = 0.2
 mainStroke.Parent = main
 
-----------------------------------------------------------------
--- TOP BAR
-----------------------------------------------------------------
+--==================================================
+-- HEADER
+--==================================================
 
-local topBar = Instance.new("TextButton")
-topBar.Name = "TopBar"
-topBar.Size = UDim2.new(1, 0, 0, 42)
-topBar.BackgroundColor3 = TOP
-topBar.BorderSizePixel = 0
-topBar.Text = ""
-topBar.AutoButtonColor = false
-topBar.Active = true
-topBar.ZIndex = 10
-topBar.Parent = main
+local header = Instance.new("Frame")
+header.Name = "Header"
+header.Size = UDim2.new(1, 0, 0, 45)
+header.BackgroundColor3 = COLORS.Header
+header.BorderSizePixel = 0
+header.Parent = main
 
-local topCorner = Instance.new("UICorner")
-topCorner.CornerRadius = UDim.new(0, 12)
-topCorner.Parent = topBar
+local headerCorner = Instance.new("UICorner")
+headerCorner.CornerRadius = UDim.new(0, 13)
+headerCorner.Parent = header
 
--- Fill bottom part of top bar so corners don't affect it
-local topFill = Instance.new("Frame")
-topFill.Size = UDim2.new(1, 0, 0, 12)
-topFill.Position = UDim2.new(0, 0, 1, -12)
-topFill.BackgroundColor3 = TOP
-topFill.BorderSizePixel = 0
-topFill.ZIndex = 10
-topFill.Parent = topBar
+-- Fills the lower corners of header
+local headerFill = Instance.new("Frame")
+headerFill.Size = UDim2.new(1, 0, 0, 15)
+headerFill.Position = UDim2.new(0, 0, 1, -15)
+headerFill.BackgroundColor3 = COLORS.Header
+headerFill.BorderSizePixel = 0
+headerFill.Parent = header
 
-----------------------------------------------------------------
--- ACCENT
-----------------------------------------------------------------
+--==================================================
+-- DRAG BUTTON
+--==================================================
+
+local dragButton = Instance.new("TextButton")
+dragButton.Name = "DragButton"
+dragButton.Size = UDim2.new(1, -70, 1, 0)
+dragButton.Position = UDim2.fromOffset(0, 0)
+dragButton.BackgroundTransparency = 1
+dragButton.BorderSizePixel = 0
+dragButton.Text = ""
+dragButton.AutoButtonColor = false
+dragButton.Active = true
+dragButton.ZIndex = 20
+dragButton.Parent = header
+
+--==================================================
+-- TITLE
+--==================================================
 
 local accent = Instance.new("Frame")
-accent.Size = UDim2.new(0, 3, 0, 18)
-accent.Position = UDim2.new(0, 7, 0.5, -9)
-accent.BackgroundColor3 = Color3.fromRGB(145, 85, 255)
+accent.Size = UDim2.fromOffset(3, 19)
+accent.Position = UDim2.fromOffset(7, 13)
+accent.BackgroundColor3 = COLORS.Purple
 accent.BorderSizePixel = 0
-accent.ZIndex = 11
-accent.Parent = topBar
+accent.ZIndex = 21
+accent.Parent = dragButton
 
 local accentCorner = Instance.new("UICorner")
 accentCorner.CornerRadius = UDim.new(1, 0)
 accentCorner.Parent = accent
 
-----------------------------------------------------------------
--- TITLE
-----------------------------------------------------------------
-
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -80, 1, 0)
-title.Position = UDim2.new(0, 14, 0, 0)
+title.Size = UDim2.new(1, -25, 1, 0)
+title.Position = UDim2.fromOffset(14, 0)
 title.BackgroundTransparency = 1
 title.Text = "Nightmare Egg"
-title.TextColor3 = TEXT
+title.TextColor3 = COLORS.Text
 title.TextSize = 15
 title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
-title.ZIndex = 11
-title.Parent = topBar
+title.ZIndex = 21
+title.Active = false
+title.Parent = dragButton
 
-----------------------------------------------------------------
--- MINIMIZE BUTTON
-----------------------------------------------------------------
+--==================================================
+-- MINIMIZE
+--==================================================
 
 local minimize = Instance.new("TextButton")
 minimize.Name = "Minimize"
-minimize.Size = UDim2.new(0, 28, 0, 28)
-minimize.Position = UDim2.new(1, -66, 0.5, -14)
+minimize.Size = UDim2.fromOffset(30, 30)
+minimize.Position = UDim2.new(1, -68, 0, 8)
 minimize.BackgroundTransparency = 1
 minimize.BorderSizePixel = 0
 minimize.Text = "−"
-minimize.TextColor3 = MUTED
-minimize.TextSize = 19
+minimize.TextColor3 = COLORS.Muted
+minimize.TextSize = 20
 minimize.Font = Enum.Font.GothamBold
 minimize.AutoButtonColor = false
-minimize.ZIndex = 50
-minimize.Parent = main
+minimize.ZIndex = 100
+minimize.Parent = header
 
-----------------------------------------------------------------
--- CLOSE BUTTON
-----------------------------------------------------------------
+--==================================================
+-- CLOSE
+--==================================================
 
 local close = Instance.new("TextButton")
 close.Name = "Close"
-close.Size = UDim2.new(0, 28, 0, 28)
-close.Position = UDim2.new(1, -35, 0.5, -14)
+close.Size = UDim2.fromOffset(30, 30)
+close.Position = UDim2.new(1, -35, 0, 8)
 close.BackgroundTransparency = 1
 close.BorderSizePixel = 0
 close.Text = "×"
-close.TextColor3 = MUTED
+close.TextColor3 = COLORS.Muted
 close.TextSize = 21
 close.Font = Enum.Font.GothamBold
 close.AutoButtonColor = false
-close.ZIndex = 50
-close.Parent = main
+close.ZIndex = 100
+close.Parent = header
 
-----------------------------------------------------------------
+--==================================================
 -- CONTENT
-----------------------------------------------------------------
+--==================================================
 
 local content = Instance.new("Frame")
 content.Name = "Content"
-content.Size = UDim2.new(1, -24, 1, -55)
-content.Position = UDim2.new(0, 12, 0, 50)
+content.Size = UDim2.new(1, -24, 1, -57)
+content.Position = UDim2.fromOffset(12, 52)
 content.BackgroundTransparency = 1
 content.Parent = main
 
-----------------------------------------------------------------
+--==================================================
 -- CREATE BUTTON
-----------------------------------------------------------------
+--==================================================
 
-local function createButton(text, y)
+local function createToggle(text, y)
 
     local button = Instance.new("TextButton")
 
     button.Size = UDim2.new(1, 0, 0, 52)
-    button.Position = UDim2.new(0, 0, 0, y)
-    button.BackgroundColor3 = BUTTON_OFF
+    button.Position = UDim2.fromOffset(0, y)
+
+    button.BackgroundColor3 = COLORS.ButtonOff
     button.BorderSizePixel = 0
+
     button.Text = text
-    button.TextColor3 = TEXT
+    button.TextColor3 = COLORS.Text
     button.TextSize = 14
     button.Font = Enum.Font.GothamSemibold
+
     button.AutoButtonColor = false
     button.Active = true
-    button.ZIndex = 5
+
     button.Parent = content
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 9)
+    corner.CornerRadius = UDim.new(0, 10)
     corner.Parent = button
 
     local stroke = Instance.new("UIStroke")
-    stroke.Color = STROKE
+    stroke.Color = COLORS.Border
     stroke.Thickness = 1
-    stroke.Transparency = 0.35
+    stroke.Transparency = 0.4
     stroke.Parent = button
 
     return button
 end
 
-local eggButton = createButton("🥚  Egg: OFF", 0)
-local chestButton = createButton("🪙  Chest: OFF", 62)
+local eggButton = createToggle("Egg: OFF", 0)
+local chestButton = createToggle("Chest: OFF", 62)
 
-----------------------------------------------------------------
+--==================================================
 -- STATES
-----------------------------------------------------------------
+--==================================================
 
 local eggEnabled = false
 local chestEnabled = false
 local minimized = false
-local closing = false
+
 local lastCloseClick = 0
+local closing = false
 
-----------------------------------------------------------------
+--==================================================
 -- BUTTON STATE
-----------------------------------------------------------------
+--==================================================
 
-local function setButtonState(button, enabled, label)
+local function updateButton(button, enabled, name)
 
     if enabled then
 
-        button.Text = label .. ": ON"
+        button.Text = name .. ": ON"
 
         TweenService:Create(
             button,
             TweenInfo.new(
-                0.2,
+                0.18,
                 Enum.EasingStyle.Quad,
                 Enum.EasingDirection.Out
             ),
             {
-                BackgroundColor3 = BUTTON_ON,
+                BackgroundColor3 = COLORS.ButtonOn,
                 TextColor3 = Color3.fromRGB(255, 255, 255)
             }
         ):Play()
 
     else
 
-        button.Text = label .. ": OFF"
+        button.Text = name .. ": OFF"
 
         TweenService:Create(
             button,
             TweenInfo.new(
-                0.2,
+                0.18,
                 Enum.EasingStyle.Quad,
                 Enum.EasingDirection.Out
             ),
             {
-                BackgroundColor3 = BUTTON_OFF,
-                TextColor3 = TEXT
+                BackgroundColor3 = COLORS.ButtonOff,
+                TextColor3 = COLORS.Text
             }
         ):Play()
 
     end
 end
 
-----------------------------------------------------------------
+--==================================================
 -- EGG HOVER
-----------------------------------------------------------------
+--==================================================
 
 eggButton.MouseEnter:Connect(function()
 
     TweenService:Create(
         eggButton,
-        TweenInfo.new(0.15),
+        TweenInfo.new(0.12),
         {
             BackgroundColor3 =
                 eggEnabled
-                and BUTTON_ON_HOVER
-                or BUTTON_OFF_HOVER
+                and COLORS.ButtonOnHover
+                or COLORS.ButtonOffHover
         }
     ):Play()
 
@@ -277,31 +301,31 @@ eggButton.MouseLeave:Connect(function()
 
     TweenService:Create(
         eggButton,
-        TweenInfo.new(0.15),
+        TweenInfo.new(0.12),
         {
             BackgroundColor3 =
                 eggEnabled
-                and BUTTON_ON
-                or BUTTON_OFF
+                and COLORS.ButtonOn
+                or COLORS.ButtonOff
         }
     ):Play()
 
 end)
 
-----------------------------------------------------------------
+--==================================================
 -- CHEST HOVER
-----------------------------------------------------------------
+--==================================================
 
 chestButton.MouseEnter:Connect(function()
 
     TweenService:Create(
         chestButton,
-        TweenInfo.new(0.15),
+        TweenInfo.new(0.12),
         {
             BackgroundColor3 =
                 chestEnabled
-                and BUTTON_ON_HOVER
-                or BUTTON_OFF_HOVER
+                and COLORS.ButtonOnHover
+                or COLORS.ButtonOffHover
         }
     ):Play()
 
@@ -311,20 +335,52 @@ chestButton.MouseLeave:Connect(function()
 
     TweenService:Create(
         chestButton,
-        TweenInfo.new(0.15),
+        TweenInfo.new(0.12),
         {
             BackgroundColor3 =
                 chestEnabled
-                and BUTTON_ON
-                or BUTTON_OFF
+                and COLORS.ButtonOn
+                or COLORS.ButtonOff
         }
     ):Play()
 
 end)
 
-----------------------------------------------------------------
+--==================================================
+-- EGG TOGGLE
+--==================================================
+
+eggButton.MouseButton1Click:Connect(function()
+
+    eggEnabled = not eggEnabled
+
+    updateButton(
+        eggButton,
+        eggEnabled,
+        "Egg"
+    )
+
+end)
+
+--==================================================
+-- CHEST TOGGLE
+--==================================================
+
+chestButton.MouseButton1Click:Connect(function()
+
+    chestEnabled = not chestEnabled
+
+    updateButton(
+        chestButton,
+        chestEnabled,
+        "Chest"
+    )
+
+end)
+
+--==================================================
 -- EGG LOOP
-----------------------------------------------------------------
+--==================================================
 
 task.spawn(function()
 
@@ -356,9 +412,9 @@ task.spawn(function()
 
 end)
 
-----------------------------------------------------------------
+--==================================================
 -- CHEST LOOP
-----------------------------------------------------------------
+--==================================================
 
 task.spawn(function()
 
@@ -389,49 +445,17 @@ task.spawn(function()
 
 end)
 
-----------------------------------------------------------------
--- EGG TOGGLE
-----------------------------------------------------------------
-
-eggButton.MouseButton1Click:Connect(function()
-
-    eggEnabled = not eggEnabled
-
-    setButtonState(
-        eggButton,
-        eggEnabled,
-        "🥚  Egg"
-    )
-
-end)
-
-----------------------------------------------------------------
--- CHEST TOGGLE
-----------------------------------------------------------------
-
-chestButton.MouseButton1Click:Connect(function()
-
-    chestEnabled = not chestEnabled
-
-    setButtonState(
-        chestButton,
-        chestEnabled,
-        "🪙  Chest"
-    )
-
-end)
-
-----------------------------------------------------------------
+--==================================================
 -- MINIMIZE
-----------------------------------------------------------------
+--==================================================
 
 minimize.MouseEnter:Connect(function()
 
     TweenService:Create(
         minimize,
-        TweenInfo.new(0.15),
+        TweenInfo.new(0.12),
         {
-            TextColor3 = TEXT
+            TextColor3 = COLORS.Text
         }
     ):Play()
 
@@ -441,9 +465,9 @@ minimize.MouseLeave:Connect(function()
 
     TweenService:Create(
         minimize,
-        TweenInfo.new(0.15),
+        TweenInfo.new(0.12),
         {
-            TextColor3 = MUTED
+            TextColor3 = COLORS.Muted
         }
     ):Play()
 
@@ -466,7 +490,7 @@ minimize.MouseButton1Click:Connect(function()
                 Enum.EasingDirection.Out
             ),
             {
-                Size = UDim2.new(0, 260, 0, 42)
+                Size = UDim2.fromOffset(270, 45)
             }
         ):Play()
 
@@ -483,7 +507,7 @@ minimize.MouseButton1Click:Connect(function()
                 Enum.EasingDirection.Out
             ),
             {
-                Size = UDim2.new(0, 260, 0, 185)
+                Size = UDim2.fromOffset(270, 190)
             }
         ):Play()
 
@@ -491,18 +515,17 @@ minimize.MouseButton1Click:Connect(function()
 
 end)
 
-----------------------------------------------------------------
--- CLOSE
--- DOUBLE CLICK REQUIRED
-----------------------------------------------------------------
+--==================================================
+-- CLOSE / DOUBLE CLICK
+--==================================================
 
 close.MouseEnter:Connect(function()
 
     TweenService:Create(
         close,
-        TweenInfo.new(0.15),
+        TweenInfo.new(0.12),
         {
-            TextColor3 = RED
+            TextColor3 = COLORS.Red
         }
     ):Play()
 
@@ -512,9 +535,9 @@ close.MouseLeave:Connect(function()
 
     TweenService:Create(
         close,
-        TweenInfo.new(0.15),
+        TweenInfo.new(0.12),
         {
-            TextColor3 = MUTED
+            TextColor3 = COLORS.Muted
         }
     ):Play()
 
@@ -536,7 +559,7 @@ close.MouseButton1Click:Connect(function()
                 Enum.EasingDirection.In
             ),
             {
-                Size = UDim2.new(0, 0, 0, 0),
+                Size = UDim2.fromOffset(0, 0),
                 Position = UDim2.new(0.5, 0, 0.5, 0)
             }
         ):Play()
@@ -560,7 +583,7 @@ close.MouseButton1Click:Connect(function()
             if not closing and tick() - lastCloseClick >= 0.6 then
 
                 close.Text = "×"
-                close.TextColor3 = MUTED
+                close.TextColor3 = COLORS.Muted
 
             end
 
@@ -570,16 +593,16 @@ close.MouseButton1Click:Connect(function()
 
 end)
 
-----------------------------------------------------------------
+--==================================================
 -- DRAGGING
--- USING MB1 DOWN
-----------------------------------------------------------------
+-- MB1 DOWN
+--==================================================
 
 local dragging = false
 local dragStart = nil
 local startPosition = nil
 
-topBar.MouseButton1Down:Connect(function(x, y)
+dragButton.MouseButton1Down:Connect(function(x, y)
 
     dragging = true
 
@@ -616,22 +639,22 @@ UserInputService.InputEnded:Connect(function(input)
 
 end)
 
-----------------------------------------------------------------
--- OPENING ANIMATION
-----------------------------------------------------------------
+--==================================================
+-- OPEN ANIMATION
+--==================================================
 
-main.Size = UDim2.new(0, 0, 0, 0)
+main.Size = UDim2.fromOffset(0, 0)
 main.Position = UDim2.new(0.5, 0, 0.5, 0)
 
 TweenService:Create(
     main,
     TweenInfo.new(
-        0.45,
+        0.4,
         Enum.EasingStyle.Back,
         Enum.EasingDirection.Out
     ),
     {
-        Size = UDim2.new(0, 260, 0, 185),
-        Position = UDim2.new(0.5, -130, 0.5, -92)
+        Size = UDim2.fromOffset(270, 190),
+        Position = UDim2.new(0.5, -135, 0.5, -95)
     }
 ):Play()
