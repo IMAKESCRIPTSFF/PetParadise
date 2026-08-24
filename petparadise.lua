@@ -29,7 +29,7 @@ titleBar.BorderSizePixel = 0
 titleBar.Parent = main
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -60, 1, 0)
+title.Size = UDim2.new(1, -90, 1, 0)
 title.Position = UDim2.new(0, 10, 0, 0)
 title.BackgroundTransparency = 1
 title.Text = "Nightmare Egg"
@@ -38,6 +38,28 @@ title.TextSize = 14
 title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = titleBar
+
+-- Page 1 button
+local page1Button = Instance.new("TextButton")
+page1Button.Size = UDim2.new(0, 22, 0, 25)
+page1Button.Position = UDim2.new(1, -112, 0, 2)
+page1Button.BackgroundTransparency = 1
+page1Button.Text = "1"
+page1Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+page1Button.TextSize = 14
+page1Button.Font = Enum.Font.GothamBold
+page1Button.Parent = titleBar
+
+-- Page 2 button
+local page2Button = Instance.new("TextButton")
+page2Button.Size = UDim2.new(0, 22, 0, 25)
+page2Button.Position = UDim2.new(1, -88, 0, 2)
+page2Button.BackgroundTransparency = 1
+page2Button.Text = "2"
+page2Button.TextColor3 = Color3.fromRGB(170, 170, 170)
+page2Button.TextSize = 14
+page2Button.Font = Enum.Font.GothamBold
+page2Button.Parent = titleBar
 
 -- Minimize button
 local minimize = Instance.new("TextButton")
@@ -61,74 +83,134 @@ close.TextSize = 20
 close.Font = Enum.Font.GothamBold
 close.Parent = titleBar
 
--- Egg button
-local eggButton = Instance.new("TextButton")
-eggButton.Size = UDim2.new(0, 180, 0, 45)
-eggButton.Position = UDim2.new(0.5, -90, 0, 40)
-eggButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
-eggButton.Text = "Egg: OFF"
-eggButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-eggButton.TextSize = 15
-eggButton.Font = Enum.Font.GothamBold
-eggButton.Parent = main
+-- Pages
+local page1 = Instance.new("Frame")
+page1.Size = UDim2.new(1, 0, 1, -30)
+page1.Position = UDim2.new(0, 0, 0, 30)
+page1.BackgroundTransparency = 1
+page1.Parent = main
 
-local eggCorner = Instance.new("UICorner")
-eggCorner.CornerRadius = UDim.new(0, 6)
-eggCorner.Parent = eggButton
+local autoPath = Instance.new("Frame")
+autoPath.Size = UDim2.new(1, 0, 1, -30)
+autoPath.Position = UDim2.new(0, 0, 0, 30)
+autoPath.BackgroundTransparency = 1
+autoPath.Visible = false
+autoPath.Parent = main
 
--- Chest button
-local chestButton = Instance.new("TextButton")
-chestButton.Size = UDim2.new(0, 180, 0, 45)
-chestButton.Position = UDim2.new(0.5, -90, 0, 95)
-chestButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
-chestButton.Text = "Chest: OFF"
-chestButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-chestButton.TextSize = 15
-chestButton.Font = Enum.Font.GothamBold
-chestButton.Parent = main
+-- Button creator
+local function createButton(parent, text, y, textSize)
+    local button = Instance.new("TextButton")
 
-local chestCorner = Instance.new("UICorner")
-chestCorner.CornerRadius = UDim.new(0, 6)
-chestCorner.Parent = chestButton
+    button.Size = UDim2.new(0, 180, 0, 45)
+    button.Position = UDim2.new(0.5, -90, 0, y)
+    button.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+    button.Text = text
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = textSize or 14
+    button.Font = Enum.Font.GothamBold
+    button.BorderSizePixel = 0
+    button.Parent = parent
 
--- Auto Buy Merchant button
-local merchantButton = Instance.new("TextButton")
-merchantButton.Size = UDim2.new(0, 180, 0, 45)
-merchantButton.Position = UDim2.new(0.5, -90, 0, 150)
-merchantButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
-merchantButton.Text = "Auto Buy Merchant: OFF"
-merchantButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-merchantButton.TextSize = 13
-merchantButton.Font = Enum.Font.GothamBold
-merchantButton.Parent = main
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0, 6)
+    buttonCorner.Parent = button
 
-local merchantCorner = Instance.new("UICorner")
-merchantCorner.CornerRadius = UDim.new(0, 6)
-merchantCorner.Parent = merchantButton
+    return button
+end
 
--- Auto Rebirth button
-local rebirthButton = Instance.new("TextButton")
-rebirthButton.Size = UDim2.new(0, 180, 0, 45)
-rebirthButton.Position = UDim2.new(0.5, -90, 0, 205)
-rebirthButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
-rebirthButton.Text = "Auto Rebirth: OFF"
-rebirthButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-rebirthButton.TextSize = 14
-rebirthButton.Font = Enum.Font.GothamBold
-rebirthButton.Parent = main
+--------------------------------------------------
+-- PAGE 1
+--------------------------------------------------
 
-local rebirthCorner = Instance.new("UICorner")
-rebirthCorner.CornerRadius = UDim.new(0, 6)
-rebirthCorner.Parent = rebirthButton
+local eggButton = createButton(page1, "Egg: OFF", 10, 15)
 
--- States
+local chestButton = createButton(page1, "Chest: OFF", 65, 15)
+
+local merchantButton = createButton(
+    page1,
+    "Auto Buy Merchant: OFF",
+    120,
+    13
+)
+
+local rebirthButton = createButton(
+    page1,
+    "Auto Rebirth: OFF",
+    175,
+    14
+)
+
+--------------------------------------------------
+-- AUTOPATH PAGE
+--------------------------------------------------
+
+local autoPathTitle = Instance.new("TextLabel")
+autoPathTitle.Size = UDim2.new(1, 0, 0, 25)
+autoPathTitle.Position = UDim2.new(0, 0, 0, 5)
+autoPathTitle.BackgroundTransparency = 1
+autoPathTitle.Text = "autoPath"
+autoPathTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoPathTitle.TextSize = 16
+autoPathTitle.Font = Enum.Font.GothamBold
+autoPathTitle.Parent = autoPath
+
+local legendaryButton = createButton(
+    autoPath,
+    "Legendary: OFF",
+    35,
+    14
+)
+
+local mythicButton = createButton(
+    autoPath,
+    "Mythic: OFF",
+    90,
+    14
+)
+
+local divineButton = createButton(
+    autoPath,
+    "Divine: OFF",
+    145,
+    14
+)
+
+local luckyBlockButton = createButton(
+    autoPath,
+    "LuckyBlock: OFF",
+    200,
+    14
+)
+
+local exclusiveButton = createButton(
+    autoPath,
+    "Exclusive: OFF",
+    255,
+    14
+)
+
+--------------------------------------------------
+-- STATES
+--------------------------------------------------
+
 local eggEnabled = false
 local chestEnabled = false
 local merchantEnabled = false
 local rebirthEnabled = false
-local minimized = false
 
--- Merchant items
+local legendaryEnabled = false
+local mythicEnabled = false
+local divineEnabled = false
+local luckyBlockEnabled = false
+local exclusiveEnabled = false
+
+local minimized = false
+local currentPage = 1
+
+--------------------------------------------------
+-- MERCHANT ITEMS
+--------------------------------------------------
+
 local merchantItems = {
     "Coin1",
     "Luck1",
@@ -143,7 +225,10 @@ local merchantItems = {
     "hugeEgg3"
 }
 
--- Nightmare Egg loop
+--------------------------------------------------
+-- NIGHTMARE EGG LOOP
+--------------------------------------------------
+
 task.spawn(function()
     while gui.Parent do
         if eggEnabled then
@@ -161,7 +246,10 @@ task.spawn(function()
     end
 end)
 
--- Coin Chest loop
+--------------------------------------------------
+-- COIN CHEST LOOP
+--------------------------------------------------
+
 task.spawn(function()
     while gui.Parent do
         if chestEnabled then
@@ -178,17 +266,23 @@ task.spawn(function()
     end
 end)
 
--- Auto Buy Merchant loop
+--------------------------------------------------
+-- MERCHANT LOOP
+--------------------------------------------------
+
 task.spawn(function()
     while gui.Parent do
         if merchantEnabled then
+
             for _, itemName in ipairs(merchantItems) do
                 if not merchantEnabled or not gui.Parent then
                     break
                 end
 
                 pcall(function()
-                    ReplicatedStorage.MerchantPurchase:FireServer(itemName)
+                    ReplicatedStorage.MerchantPurchase:FireServer(
+                        itemName
+                    )
                 end)
             end
 
@@ -199,7 +293,10 @@ task.spawn(function()
     end
 end)
 
--- Auto Rebirth loop
+--------------------------------------------------
+-- REBIRTH LOOP
+--------------------------------------------------
+
 task.spawn(function()
     while gui.Parent do
         if rebirthEnabled then
@@ -214,8 +311,25 @@ task.spawn(function()
     end
 end)
 
--- Egg toggle
+--------------------------------------------------
+-- AUTOPATH FUNCTION
+--------------------------------------------------
+
+local function changeAutoBuy(rarity, enabled)
+    pcall(function()
+        ReplicatedStorage.Events.ChangeAutoBuy:FireServer(
+            rarity,
+            enabled
+        )
+    end)
+end
+
+--------------------------------------------------
+-- EGG TOGGLE
+--------------------------------------------------
+
 eggButton.MouseButton1Click:Connect(function()
+
     eggEnabled = not eggEnabled
 
     if eggEnabled then
@@ -225,10 +339,15 @@ eggButton.MouseButton1Click:Connect(function()
         eggButton.Text = "Egg: OFF"
         eggButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
     end
+
 end)
 
--- Chest toggle
+--------------------------------------------------
+-- CHEST TOGGLE
+--------------------------------------------------
+
 chestButton.MouseButton1Click:Connect(function()
+
     chestEnabled = not chestEnabled
 
     if chestEnabled then
@@ -238,10 +357,15 @@ chestButton.MouseButton1Click:Connect(function()
         chestButton.Text = "Chest: OFF"
         chestButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
     end
+
 end)
 
--- Auto Buy Merchant toggle
+--------------------------------------------------
+-- MERCHANT TOGGLE
+--------------------------------------------------
+
 merchantButton.MouseButton1Click:Connect(function()
+
     merchantEnabled = not merchantEnabled
 
     if merchantEnabled then
@@ -251,10 +375,15 @@ merchantButton.MouseButton1Click:Connect(function()
         merchantButton.Text = "Auto Buy Merchant: OFF"
         merchantButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
     end
+
 end)
 
--- Auto Rebirth toggle
+--------------------------------------------------
+-- REBIRTH TOGGLE
+--------------------------------------------------
+
 rebirthButton.MouseButton1Click:Connect(function()
+
     rebirthEnabled = not rebirthEnabled
 
     if rebirthEnabled then
@@ -264,49 +393,231 @@ rebirthButton.MouseButton1Click:Connect(function()
         rebirthButton.Text = "Auto Rebirth: OFF"
         rebirthButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
     end
+
 end)
 
--- Minimize
+--------------------------------------------------
+-- LEGENDARY
+--------------------------------------------------
+
+legendaryButton.MouseButton1Click:Connect(function()
+
+    legendaryEnabled = not legendaryEnabled
+
+    changeAutoBuy(
+        "Legendary",
+        legendaryEnabled
+    )
+
+    if legendaryEnabled then
+        legendaryButton.Text = "Legendary: ON"
+        legendaryButton.BackgroundColor3 = Color3.fromRGB(50, 170, 80)
+    else
+        legendaryButton.Text = "Legendary: OFF"
+        legendaryButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+    end
+
+end)
+
+--------------------------------------------------
+-- MYTHIC
+--------------------------------------------------
+
+mythicButton.MouseButton1Click:Connect(function()
+
+    mythicEnabled = not mythicEnabled
+
+    changeAutoBuy(
+        "Mythic",
+        mythicEnabled
+    )
+
+    if mythicEnabled then
+        mythicButton.Text = "Mythic: ON"
+        mythicButton.BackgroundColor3 = Color3.fromRGB(50, 170, 80)
+    else
+        mythicButton.Text = "Mythic: OFF"
+        mythicButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+    end
+
+end)
+
+--------------------------------------------------
+-- DIVINE
+--------------------------------------------------
+
+divineButton.MouseButton1Click:Connect(function()
+
+    divineEnabled = not divineEnabled
+
+    changeAutoBuy(
+        "Divine",
+        divineEnabled
+    )
+
+    if divineEnabled then
+        divineButton.Text = "Divine: ON"
+        divineButton.BackgroundColor3 = Color3.fromRGB(50, 170, 80)
+    else
+        divineButton.Text = "Divine: OFF"
+        divineButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+    end
+
+end)
+
+--------------------------------------------------
+-- LUCKY BLOCK
+--------------------------------------------------
+
+luckyBlockButton.MouseButton1Click:Connect(function()
+
+    luckyBlockEnabled = not luckyBlockEnabled
+
+    changeAutoBuy(
+        "LuckyBlock",
+        luckyBlockEnabled
+    )
+
+    if luckyBlockEnabled then
+        luckyBlockButton.Text = "LuckyBlock: ON"
+        luckyBlockButton.BackgroundColor3 = Color3.fromRGB(50, 170, 80)
+    else
+        luckyBlockButton.Text = "LuckyBlock: OFF"
+        luckyBlockButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+    end
+
+end)
+
+--------------------------------------------------
+-- EXCLUSIVE
+--------------------------------------------------
+
+exclusiveButton.MouseButton1Click:Connect(function()
+
+    exclusiveEnabled = not exclusiveEnabled
+
+    changeAutoBuy(
+        "Exclusive",
+        exclusiveEnabled
+    )
+
+    if exclusiveEnabled then
+        exclusiveButton.Text = "Exclusive: ON"
+        exclusiveButton.BackgroundColor3 = Color3.fromRGB(50, 170, 80)
+    else
+        exclusiveButton.Text = "Exclusive: OFF"
+        exclusiveButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+    end
+
+end)
+
+--------------------------------------------------
+-- PAGE SWITCHING
+--------------------------------------------------
+
+page1Button.MouseButton1Click:Connect(function()
+
+    if minimized then
+        return
+    end
+
+    currentPage = 1
+
+    page1.Visible = true
+    autoPath.Visible = false
+
+    title.Text = "Nightmare Egg"
+
+    page1Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    page2Button.TextColor3 = Color3.fromRGB(170, 170, 170)
+
+end)
+
+page2Button.MouseButton1Click:Connect(function()
+
+    if minimized then
+        return
+    end
+
+    currentPage = 2
+
+    page1.Visible = false
+    autoPath.Visible = true
+
+    title.Text = "autoPath"
+
+    page1Button.TextColor3 = Color3.fromRGB(170, 170, 170)
+    page2Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+end)
+
+--------------------------------------------------
+-- MINIMIZE
+--------------------------------------------------
+
 minimize.MouseButton1Click:Connect(function()
+
     minimized = not minimized
 
     if minimized then
+
         main.Size = UDim2.new(0, 220, 0, 30)
 
-        eggButton.Visible = false
-        chestButton.Visible = false
-        merchantButton.Visible = false
-        rebirthButton.Visible = false
+        page1.Visible = false
+        autoPath.Visible = false
 
         minimize.Text = "+"
+
     else
+
         main.Size = UDim2.new(0, 220, 0, 315)
 
-        eggButton.Visible = true
-        chestButton.Visible = true
-        merchantButton.Visible = true
-        rebirthButton.Visible = true
+        if currentPage == 1 then
+            page1.Visible = true
+            autoPath.Visible = false
+        else
+            page1.Visible = false
+            autoPath.Visible = true
+        end
 
         minimize.Text = "−"
+
     end
+
 end)
 
--- Close
+--------------------------------------------------
+-- CLOSE
+--------------------------------------------------
+
 close.MouseButton1Click:Connect(function()
+
     eggEnabled = false
     chestEnabled = false
     merchantEnabled = false
     rebirthEnabled = false
 
+    -- Turn AutoPath options OFF
+    changeAutoBuy("Legendary", false)
+    changeAutoBuy("Mythic", false)
+    changeAutoBuy("Divine", false)
+    changeAutoBuy("LuckyBlock", false)
+    changeAutoBuy("Exclusive", false)
+
     gui:Destroy()
+
 end)
 
--- Dragging
+--------------------------------------------------
+-- DRAGGING
+--------------------------------------------------
+
 local dragging = false
 local dragStart
 local startPos
 
 titleBar.InputBegan:Connect(function(input)
+
     if input.UserInputType == Enum.UserInputType.MouseButton1
         or input.UserInputType == Enum.UserInputType.Touch then
 
@@ -315,14 +626,19 @@ titleBar.InputBegan:Connect(function(input)
         startPos = main.Position
 
         input.Changed:Connect(function()
+
             if input.UserInputState == Enum.UserInputState.End then
                 dragging = false
             end
+
         end)
+
     end
+
 end)
 
 UserInputService.InputChanged:Connect(function(input)
+
     if dragging and (
         input.UserInputType == Enum.UserInputType.MouseMovement
         or input.UserInputType == Enum.UserInputType.Touch
@@ -336,5 +652,7 @@ UserInputService.InputChanged:Connect(function(input)
             startPos.Y.Scale,
             startPos.Y.Offset + delta.Y
         )
+
     end
+
 end)
