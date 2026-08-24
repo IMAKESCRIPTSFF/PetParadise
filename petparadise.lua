@@ -268,13 +268,17 @@ end)
 
 --------------------------------------------------
 -- MERCHANT LOOP
+-- Each item is attempted once every 1 second,
+-- one after another.
 --------------------------------------------------
 
 task.spawn(function()
     while gui.Parent do
+
         if merchantEnabled then
 
             for _, itemName in ipairs(merchantItems) do
+
                 if not merchantEnabled or not gui.Parent then
                     break
                 end
@@ -284,12 +288,16 @@ task.spawn(function()
                         itemName
                     )
                 end)
+
+                -- Wait 1 second before attempting
+                -- the next merchant item.
+                task.wait(1)
             end
 
-            task.wait(10)
         else
             task.wait(0.1)
         end
+
     end
 end)
 
