@@ -6,13 +6,13 @@ local player = Players.LocalPlayer
 
 -- GUI
 local gui = Instance.new("ScreenGui")
-gui.Name = "NeonEggGUI"
+gui.Name = "EggGUI"
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 220, 0, 260)
-main.Position = UDim2.new(0.5, -110, 0.5, -130)
+main.Size = UDim2.new(0, 220, 0, 315)
+main.Position = UDim2.new(0.5, -110, 0.5, -157)
 main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 main.BorderSizePixel = 0
 main.Parent = gui
@@ -21,7 +21,10 @@ local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 8)
 corner.Parent = main
 
--- Title bar
+--------------------------------------------------
+-- TITLE BAR
+--------------------------------------------------
+
 local titleBar = Instance.new("Frame")
 titleBar.Size = UDim2.new(1, 0, 0, 30)
 titleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
@@ -32,14 +35,17 @@ local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -60, 1, 0)
 title.Position = UDim2.new(0, 10, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "Neon Egg"
+title.Text = "Egg GUI"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.TextSize = 14
 title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = titleBar
 
--- Minimize button
+--------------------------------------------------
+-- MINIMIZE BUTTON
+--------------------------------------------------
+
 local minimize = Instance.new("TextButton")
 minimize.Size = UDim2.new(0, 25, 0, 25)
 minimize.Position = UDim2.new(1, -55, 0, 2)
@@ -50,7 +56,10 @@ minimize.TextSize = 20
 minimize.Font = Enum.Font.GothamBold
 minimize.Parent = titleBar
 
--- Close button
+--------------------------------------------------
+-- CLOSE BUTTON
+--------------------------------------------------
+
 local close = Instance.new("TextButton")
 close.Size = UDim2.new(0, 25, 0, 25)
 close.Position = UDim2.new(1, -28, 0, 2)
@@ -61,18 +70,24 @@ close.TextSize = 20
 close.Font = Enum.Font.GothamBold
 close.Parent = titleBar
 
--- Main page
+--------------------------------------------------
+-- MAIN PAGE
+--------------------------------------------------
+
 local page1 = Instance.new("Frame")
 page1.Size = UDim2.new(1, 0, 1, -30)
 page1.Position = UDim2.new(0, 0, 0, 30)
 page1.BackgroundTransparency = 1
 page1.Parent = main
 
--- Button creator
+--------------------------------------------------
+-- BUTTON CREATOR
+--------------------------------------------------
+
 local function createButton(parent, text, y, textSize)
     local button = Instance.new("TextButton")
 
-    button.Size = UDim2.new(0, 180, 0, 45)
+    button.Size = UDim2.new(0, 180, 0, 40)
     button.Position = UDim2.new(0.5, -90, 0, y)
     button.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
     button.Text = text
@@ -80,6 +95,7 @@ local function createButton(parent, text, y, textSize)
     button.TextSize = textSize or 14
     button.Font = Enum.Font.GothamBold
     button.BorderSizePixel = 0
+    button.AutoButtonColor = false
     button.Parent = parent
 
     local buttonCorner = Instance.new("UICorner")
@@ -93,21 +109,38 @@ end
 -- BUTTONS
 --------------------------------------------------
 
-local eggButton = createButton(page1, "Egg: OFF", 10, 15)
+local neonButton = createButton(
+    page1,
+    "Neon Egg: OFF",
+    10,
+    14
+)
 
-local chestButton = createButton(page1, "Chest: OFF", 65, 15)
+local hellButton = createButton(
+    page1,
+    "Hell Egg: OFF",
+    58,
+    14
+)
+
+local chestButton = createButton(
+    page1,
+    "Chest: OFF",
+    106,
+    14
+)
 
 local merchantButton = createButton(
     page1,
     "Auto Buy Merchant: OFF",
-    120,
-    13
+    154,
+    12
 )
 
 local rebirthButton = createButton(
     page1,
     "Auto Rebirth: OFF",
-    175,
+    202,
     14
 )
 
@@ -115,7 +148,8 @@ local rebirthButton = createButton(
 -- STATES
 --------------------------------------------------
 
-local eggEnabled = false
+local neonEnabled = false
+local hellEnabled = false
 local chestEnabled = false
 local merchantEnabled = false
 local rebirthEnabled = false
@@ -145,10 +179,33 @@ local merchantItems = {
 
 task.spawn(function()
     while gui.Parent do
-        if eggEnabled then
+        if neonEnabled then
             pcall(function()
                 local args = {
                     [1] = "Neon Egg",
+                    [2] = "Triple"
+                }
+
+                ReplicatedStorage.Functions.Hatch:InvokeServer(unpack(args))
+            end)
+
+            task.wait(0.1)
+        else
+            task.wait(0.1)
+        end
+    end
+end)
+
+--------------------------------------------------
+-- HELL EGG LOOP
+--------------------------------------------------
+
+task.spawn(function()
+    while gui.Parent do
+        if hellEnabled then
+            pcall(function()
+                local args = {
+                    [1] = "Hell Egg",
                     [2] = "Triple"
                 }
 
@@ -226,18 +283,34 @@ task.spawn(function()
 end)
 
 --------------------------------------------------
--- EGG TOGGLE
+-- NEON EGG TOGGLE
 --------------------------------------------------
 
-eggButton.MouseButton1Click:Connect(function()
-    eggEnabled = not eggEnabled
+neonButton.MouseButton1Click:Connect(function()
+    neonEnabled = not neonEnabled
 
-    if eggEnabled then
-        eggButton.Text = "Egg: ON"
-        eggButton.BackgroundColor3 = Color3.fromRGB(50, 170, 80)
+    if neonEnabled then
+        neonButton.Text = "Neon Egg: ON"
+        neonButton.BackgroundColor3 = Color3.fromRGB(50, 170, 80)
     else
-        eggButton.Text = "Egg: OFF"
-        eggButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+        neonButton.Text = "Neon Egg: OFF"
+        neonButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+    end
+end)
+
+--------------------------------------------------
+-- HELL EGG TOGGLE
+--------------------------------------------------
+
+hellButton.MouseButton1Click:Connect(function()
+    hellEnabled = not hellEnabled
+
+    if hellEnabled then
+        hellButton.Text = "Hell Egg: ON"
+        hellButton.BackgroundColor3 = Color3.fromRGB(50, 170, 80)
+    else
+        hellButton.Text = "Hell Egg: OFF"
+        hellButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
     end
 end)
 
@@ -301,7 +374,7 @@ minimize.MouseButton1Click:Connect(function()
         page1.Visible = false
         minimize.Text = "+"
     else
-        main.Size = UDim2.new(0, 220, 0, 260)
+        main.Size = UDim2.new(0, 220, 0, 315)
         page1.Visible = true
         minimize.Text = "−"
     end
@@ -312,7 +385,8 @@ end)
 --------------------------------------------------
 
 close.MouseButton1Click:Connect(function()
-    eggEnabled = false
+    neonEnabled = false
+    hellEnabled = false
     chestEnabled = false
     merchantEnabled = false
     rebirthEnabled = false
