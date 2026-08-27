@@ -170,7 +170,8 @@ local merchantItems = {
     "Luck3",
     "Speed3",
     "Mega1",
-    "hugeEgg3"
+    "hugeEgg3",
+    "Valk"
 }
 
 --------------------------------------------------
