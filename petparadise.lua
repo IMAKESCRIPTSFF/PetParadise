@@ -12,7 +12,7 @@ local player = Players.LocalPlayer
 --------------------------------------------------
 
 local GUI_WIDTH = 215
-local GUI_HEIGHT = 430
+local GUI_HEIGHT = 480
 
 local BG = Color3.fromRGB(12, 10, 18)
 local PANEL = Color3.fromRGB(19, 16, 28)
@@ -589,6 +589,12 @@ local diamondButton, diamondVisual =
 local rubyButton, rubyVisual =
 	createButton("Ruby", 6, autoPage)
 
+local sapphireButton, sapphireVisual =
+	createButton("Sapphire", 7, autoPage)
+
+local mineButton, mineVisual =
+	createButton("AutoMine", 8, autoPage)
+
 --------------------------------------------------
 -- STATES
 --------------------------------------------------
@@ -602,13 +608,15 @@ local xrayEnabled = false
 local cameraEnabled = false
 local highlightsEnabled = false
 local oreTeleportEnabled = false
+local autoMineEnabled = false
 
 local selectedOres = {
 	Emerald = false,
 	Copper = false,
 	Gold = false,
 	Diamond = false,
-	Ruby = false
+	Ruby = false,
+	Sapphire = false
 }
 
 local minimized = false
@@ -618,11 +626,20 @@ local minimized = false
 --------------------------------------------------
 
 local ORE_TARGETS = {
-	Emerald = "105987836113242",
-	Copper = "85521264923328",
-	Gold = "104707979397729",
-	Diamond = "93678772610988",
-	Ruby = "105440248930136"
+	Emerald = { meshId = "105987836113242" },
+	Copper = { meshId = "85521264923328" },
+	Gold = { meshId = "104707979397729", parentName = "Gold" },
+	Sapphire = { meshId = "104707979397729", parentName = "Sapphire" },
+	Diamond = { meshId = "93678772610988" },
+	Ruby = { meshId = "105440248930136" }
+}
+
+local FALLBACK_MATERIALS = {
+	Sand = true,
+	Obsidian = true,
+	Hardstone = true,
+	Stone = true,
+	Dirt = true
 }
 
 local originalCharacterCollision = {}
@@ -676,6 +693,7 @@ local XRAY_TRANSPARENCY = 0.95
 local originalTransparency = {}
 local targetHighlights = {}
 local trackedOres = {}
+local trackedDigBlocks = {}
 local workspaceAddedConnection
 local workspaceRemovingConnection
 
@@ -699,11 +717,15 @@ local function trackOre(obj)
 	if not obj:IsA("MeshPart") then
 		return
 	end
-	for oreName, meshId in pairs(ORE_TARGETS) do
-		if isMesh(obj, meshId) then
+	for oreName, target in pairs(ORE_TARGETS) do
+		if isMesh(obj, target.meshId)
+			and (not target.parentName or (obj.Parent and obj.Parent.Name == target.parentName)) then
 			trackedOres[obj] = oreName
 			return
 		end
+	end
+	if isMesh(obj, XRAY_MESH_ID) then
+		trackedDigBlocks[obj] = true
 	end
 end
 
@@ -721,6 +743,43 @@ local function getNearestSelectedOre()
 			local distance = (obj.Position - root.Position).Magnitude
 			if not nearestDistance or distance < nearestDistance then
 				nearest = obj
+				nearestDistance = distance
+			end
+		end
+	end
+	return nearest
+end
+
+local function getDigBlockMaterial(part)
+	local candidates = {
+		part:GetAttribute("Material"),
+		part:GetAttribute("BlockType"),
+		part.Name,
+		part.Parent and part.Parent.Name
+	}
+
+	for _, material in pairs(candidates) do
+		if typeof(material) == "string" and FALLBACK_MATERIALS[material] then
+			return material
+		end
+	end
+	return nil
+end
+
+local function getNearestDigBlockBelow()
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if not root then
+		return nil
+	end
+
+	local nearest
+	local nearestDistance
+	for block in pairs(trackedDigBlocks) do
+		if block.Parent and getDigBlockMaterial(block) and block.Position.Y < root.Position.Y - 1 then
+			local distance = (block.Position - root.Position).Magnitude
+			if not nearestDistance or distance < nearestDistance then
+				nearest = block
 				nearestDistance = distance
 			end
 		end
@@ -843,6 +902,7 @@ end)
 workspaceRemovingConnection = Workspace.DescendantRemoving:Connect(function(obj)
 	removeTargetHighlight(obj)
 	trackedOres[obj] = nil
+	trackedDigBlocks[obj] = nil
 	originalTransparency[obj] = nil
 end)
 
@@ -1147,6 +1207,7 @@ end)
 --------------------------------------------------
 
 local currentOreTarget
+local currentTargetIsDigBlock = false
 
 local function toggleOreSelection(oreName, button, visual)
 	selectedOres[oreName] = not selectedOres[oreName]
@@ -1173,10 +1234,27 @@ rubyButton.MouseButton1Click:Connect(function()
 	toggleOreSelection("Ruby", rubyButton, rubyVisual)
 end)
 
+sapphireButton.MouseButton1Click:Connect(function()
+	toggleOreSelection("Sapphire", sapphireButton, sapphireVisual)
+end)
+
+mineButton.MouseButton1Click:Connect(function()
+	autoMineEnabled = not autoMineEnabled
+	if autoMineEnabled and not oreTeleportEnabled then
+		oreTeleportEnabled = true
+		setNoclip(true)
+		updateButton(autoMineButton, autoMineVisual, true)
+	end
+	updateButton(mineButton, mineVisual, autoMineEnabled)
+end)
+
 autoMineButton.MouseButton1Click:Connect(function()
 	oreTeleportEnabled = not oreTeleportEnabled
 	if not oreTeleportEnabled then
 		currentOreTarget = nil
+		currentTargetIsDigBlock = false
+		autoMineEnabled = false
+		updateButton(mineButton, mineVisual, false)
 	end
 	setNoclip(oreTeleportEnabled)
 	updateButton(autoMineButton, autoMineVisual, oreTeleportEnabled)
@@ -1187,10 +1265,16 @@ task.spawn(function()
 		if oreTeleportEnabled then
 			local currentTargetValid = currentOreTarget
 				and currentOreTarget.Parent
-				and isSelectedOre(currentOreTarget)
+				and (currentTargetIsDigBlock and trackedDigBlocks[currentOreTarget]
+					or not currentTargetIsDigBlock and isSelectedOre(currentOreTarget))
 
 			if not currentTargetValid then
 				currentOreTarget = getNearestSelectedOre()
+				currentTargetIsDigBlock = false
+				if not currentOreTarget and autoMineEnabled then
+					currentOreTarget = getNearestDigBlockBelow()
+					currentTargetIsDigBlock = currentOreTarget ~= nil
+				end
 				local character = player.Character or player.CharacterAdded:Wait()
 				local root = character:FindFirstChild("HumanoidRootPart")
 				if currentOreTarget and root then
@@ -1202,6 +1286,58 @@ task.spawn(function()
 			task.wait(0.1)
 		end
 	end
+end)
+
+local heldMiningTarget
+
+local function releaseMiningInput()
+	if heldMiningTarget and type(mouse1release) == "function" then
+		pcall(mouse1release)
+	end
+	heldMiningTarget = nil
+end
+
+local function beginMiningInput(target)
+	if type(mouse1press) ~= "function" then
+		return false
+	end
+	if type(isrbxactive) == "function" and not isrbxactive() then
+		return false
+	end
+
+	local camera = Workspace.CurrentCamera
+	if camera then
+		camera.CFrame = CFrame.lookAt(camera.CFrame.Position, target.Position)
+		local screenPoint, visible = camera:WorldToViewportPoint(target.Position)
+		if visible then
+			local mousePosition = UserInputService:GetMouseLocation()
+			if type(mousemoverel) == "function" then
+				pcall(mousemoverel, screenPoint.X - mousePosition.X, screenPoint.Y - mousePosition.Y)
+			elseif type(mousemoveabs) == "function" then
+				pcall(mousemoveabs, screenPoint.X, screenPoint.Y)
+			end
+			task.wait(0.08)
+		end
+	end
+
+	local pressed = pcall(mouse1press)
+	if pressed then
+		heldMiningTarget = target
+	end
+	return pressed
+end
+
+task.spawn(function()
+	while gui.Parent do
+		if not autoMineEnabled then
+			releaseMiningInput()
+		elseif not heldMiningTarget and currentOreTarget and currentOreTarget.Parent then
+			beginMiningInput(currentOreTarget)
+		end
+
+		task.wait(0.15)
+	end
+	releaseMiningInput()
 end)
 
 --------------------------------------------------
@@ -1417,7 +1553,10 @@ yesButton.MouseButton1Click:Connect(function()
 	merchantEnabled = false
 	rebirthEnabled = false
 	oreTeleportEnabled = false
+	autoMineEnabled = false
 	currentOreTarget = nil
+	currentTargetIsDigBlock = false
+	releaseMiningInput()
 	setNoclip(false)
 	xrayEnabled = false
 	highlightsEnabled = false
