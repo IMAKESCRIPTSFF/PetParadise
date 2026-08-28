@@ -12,7 +12,7 @@ local player = Players.LocalPlayer
 --------------------------------------------------
 
 local GUI_WIDTH = 215
-local GUI_HEIGHT = 480
+local GUI_HEIGHT = 530
 
 local BG = Color3.fromRGB(12, 10, 18)
 local PANEL = Color3.fromRGB(19, 16, 28)
@@ -592,8 +592,11 @@ local rubyButton, rubyVisual =
 local sapphireButton, sapphireVisual =
 	createButton("Sapphire", 7, autoPage)
 
+local mineEggTeleportButton, mineEggTeleportVisual =
+	createButton("Mine Egg TP", 8, autoPage)
+
 local mineButton, mineVisual =
-	createButton("AutoMine", 8, autoPage)
+	createButton("AutoMine", 9, autoPage)
 
 --------------------------------------------------
 -- STATES
@@ -688,12 +691,14 @@ end
 
 local XRAY_MESH_ID = "104660314962060"
 local HIGHLIGHT_MESH_ID = "125738587901888"
+local MINE_EGG_MAX_DISTANCE = 10
 local XRAY_TRANSPARENCY = 0.95
 
 local originalTransparency = {}
 local targetHighlights = {}
 local trackedOres = {}
 local trackedDigBlocks = {}
+local trackedMineEggs = {}
 local workspaceAddedConnection
 local workspaceRemovingConnection
 
@@ -717,6 +722,9 @@ local function trackOre(obj)
 	if not obj:IsA("MeshPart") then
 		return
 	end
+	if isMesh(obj, HIGHLIGHT_MESH_ID) then
+		trackedMineEggs[obj] = true
+	end
 	for oreName, target in pairs(ORE_TARGETS) do
 		if isMesh(obj, target.meshId)
 			and (not target.parentName or (obj.Parent and obj.Parent.Name == target.parentName)) then
@@ -727,6 +735,39 @@ local function trackOre(obj)
 	if isMesh(obj, XRAY_MESH_ID) then
 		trackedDigBlocks[obj] = true
 	end
+end
+
+local function getNearestMineEggInRange()
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if not root then
+		return nil
+	end
+
+	local nearest
+	local nearestDistance
+	for mineEgg in pairs(trackedMineEggs) do
+		if mineEgg.Parent then
+			local distance = (mineEgg.Position - root.Position).Magnitude
+			if distance <= MINE_EGG_MAX_DISTANCE
+				and (not nearestDistance or distance < nearestDistance) then
+				nearest = mineEgg
+				nearestDistance = distance
+			end
+		end
+	end
+	return nearest
+end
+
+local function isMineEggInRange(mineEgg)
+	if not mineEgg or not mineEgg.Parent or not trackedMineEggs[mineEgg] then
+		return false
+	end
+
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	return root ~= nil
+		and (mineEgg.Position - root.Position).Magnitude <= MINE_EGG_MAX_DISTANCE
 end
 
 local function getNearestSelectedOre()
@@ -747,6 +788,7 @@ local function getNearestSelectedOre()
 			end
 		end
 	end
+
 	return nearest
 end
 
@@ -903,6 +945,7 @@ workspaceRemovingConnection = Workspace.DescendantRemoving:Connect(function(obj)
 	removeTargetHighlight(obj)
 	trackedOres[obj] = nil
 	trackedDigBlocks[obj] = nil
+	trackedMineEggs[obj] = nil
 	originalTransparency[obj] = nil
 end)
 
@@ -1208,6 +1251,45 @@ end)
 
 local currentOreTarget
 local currentTargetIsDigBlock = false
+local mineEggTeleportIndex = 0
+
+local function getMineEggsInRange()
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if not root then
+		return {}
+	end
+
+	local mineEggs = {}
+	for mineEgg in pairs(trackedMineEggs) do
+		if mineEgg.Parent
+			and (mineEgg.Position - root.Position).Magnitude <= MINE_EGG_MAX_DISTANCE then
+			table.insert(mineEggs, mineEgg)
+		end
+	end
+
+	table.sort(mineEggs, function(a, b)
+		return (a.Position - root.Position).Magnitude
+			< (b.Position - root.Position).Magnitude
+	end)
+	return mineEggs
+end
+
+local function teleportToNextMineEgg()
+	local mineEggs = getMineEggsInRange()
+	if #mineEggs == 0 then
+		mineEggTeleportIndex = 0
+		return
+	end
+
+	mineEggTeleportIndex = (mineEggTeleportIndex % #mineEggs) + 1
+	local target = mineEggs[mineEggTeleportIndex]
+	local character = player.Character or player.CharacterAdded:Wait()
+	local root = character:FindFirstChild("HumanoidRootPart")
+	if root and target and target.Parent then
+		root.CFrame = CFrame.new(getClearOrePosition(target))
+	end
+end
 
 local function toggleOreSelection(oreName, button, visual)
 	selectedOres[oreName] = not selectedOres[oreName]
@@ -1236,6 +1318,16 @@ end)
 
 sapphireButton.MouseButton1Click:Connect(function()
 	toggleOreSelection("Sapphire", sapphireButton, sapphireVisual)
+end)
+
+mineEggTeleportButton.MouseButton1Click:Connect(function()
+	teleportToNextMineEgg()
+	updateButton(mineEggTeleportButton, mineEggTeleportVisual, true)
+	task.delay(0.18, function()
+		if gui.Parent then
+			updateButton(mineEggTeleportButton, mineEggTeleportVisual, false)
+		end
+	end)
 end)
 
 mineButton.MouseButton1Click:Connect(function()
